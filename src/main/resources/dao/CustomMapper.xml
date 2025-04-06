@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zheng.business.dao.CustomMapper">
+
+    <insert id="insertCustom" parameterType="Custom" useGeneratedKeys="true" keyProperty="id">
+        insert into custom value(null,#{user_id},#{create_time},#{update_time},#{company_name},#{status},#{city_code},#{city_name},#{address},#{detail_address},#{longitude},#{latitude},#{remark});
+    </insert>
+
+    <insert id="insertCustomVisit" parameterType="Custom_Visit" useGeneratedKeys="true" keyProperty="id">
+        insert into custom_visit value(null,#{custom_id},#{city_code},#{city_name},#{address},#{detail_address},#{contract_name},#{phone},#{position},#{longitude},#{latitude},#{create_time},#{update_time});
+    </insert>
+
+    <update id="updateCustomStatus">
+        update custom set status=#{status},update_time=#{time} where id=#{id}
+    </update>
+
+    <update id="updateCustomBD">
+        update custom set user_id=#{bd},update_time=#{time} where id=#{id}
+    </update>
+
+    <update id="updateCustomRemark">
+        update custom set remark=#{remark},update_time=#{time} where id=#{id}
+    </update>
+
+    <delete id="deleteCustomVisit">
+        delete from custom_visit where id=#{id}
+    </delete>
+
+    <select id="findCustomVisitListWentMakeVisits" resultType="java.util.LinkedHashMap">
+        SELECT custom_visit.id,custom.company_name,custom_visit.address,custom_visit.detail_address FROM custom_visit,bd_account,custom WHERE bd_account.id=custom.user_id and custom_visit.custom_id=custom.id and  bd_account.id=#{id} ${condition}
+    </select>
+
+    <select id="findCustomVisit" resultType="java.util.LinkedHashMap">
+        select custom_visit.custom_id,custom_visit.id,custom_visit.city_name,custom_visit.address,custom_visit.detail_address,contract_name,phone,position,custom_visit.latitude,custom_visit.longitude from custom_visit,custom where custom_id=#{id} and custom_visit.custom_id=custom.id ${condition}
+    </select>
+
+    <select id="findCustomVisitCount" resultType="Integer">
+        select COUNT(DISTINCT custom_visit.id) from custom_visit,custom where custom_id=#{id} and custom_visit.custom_id=custom.id
+    </select>
+
+    <select id="findCustomVisitbyId" resultType="java.util.LinkedHashMap">
+        SELECT id,custom_id,city_code,city_name,address,detail_address,latitude,longitude,contract_name,phone,position from custom_visit where id=#{id}
+    </select>
+
+    <select id="findCustomVisitzuobiaobyId" resultType="Visit">
+        SELECT longitude,latitude from custom_visit where id=#{id}
+    </select>
+
+    <update id="updateCustomVisit">
+        update custom_visit set city_code=#{city_code},city_name=#{city_name},address=#{address},detail_address=#{detail_address},contract_name=#{contract_name},phone=#{phone},position=#{position},longitude=#{longitude},latitude=#{latitude},update_time=#{update_time} where id=#{id}
+    </update>
+
+    <select id="findCustom" resultType="java.util.LinkedHashMap">
+        SELECT custom.id,custom.user_id,bd_account.name,bd_account.phone,custom.company_name,custom.status,custom.city_code,custom.city_name,custom.address,custom.detail_address from custom,bd_account where custom.user_id=bd_account.id ${condition}
+    </select>
+
+    <select id="findCustomCount" resultType="Integer">
+        SELECT COUNT(DISTINCT custom.id) from custom,bd_account where custom.user_id=bd_account.id ${condition}
+    </select>
+
+    <update id="updateCustom">
+        update custom set company_name=#{company_name},city_code=#{city_code},city_name=#{city_name},address=#{address},detail_address=#{detail_address},longitude=#{longitude},latitude=#{latitude},update_time=#{update_time},remark=#{remark} where id=#{id}
+    </update>
+
+    <select id="findCustombyId" resultType="java.util.LinkedHashMap">
+        SELECT custom.id,company_name,custom.user_id,address,detail_address,custom.status,remark,latitude,longitude,city_code from custom,bd_account where custom.user_id=bd_account.id and custom.id=#{id}
+    </select>
+
+    <insert id="insertAudit" parameterType="Audit" useGeneratedKeys="true" keyProperty="id">
+        insert into audit value(null,#{custom_id},#{user_id},#{status});
+    </insert>
+
+    <update id="updateAudit">
+        update audit set status=#{status} where id=#{id}
+    </update>
+
+    <select id="findAuditById" resultType="Audit">
+        select * from audit where id=#{id}
+    </select>
+
+    <select id="findAuditList" resultType="java.util.LinkedHashMap">
+        select audit.id,custom.company_name,bd_account.name,audit.status from audit,bd_account,custom where audit.custom_id=custom.id and audit.user_id=bd_account.id ${condition}
+    </select>
+    <select id="findAuditListCount" resultType="Integer">
+        select COUNT(DISTINCT audit.id) from audit,bd_account,custom where audit.custom_id=custom.id and audit.user_id=bd_account.id ${condition}
+    </select>
+</mapper>

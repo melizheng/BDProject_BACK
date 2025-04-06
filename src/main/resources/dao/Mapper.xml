@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zheng.business.dao.Mapper">
+
+    <select id="login" resultType="Bd_Account" parameterType="UserLoginAcc">
+        SELECT id,status,name from bd_account where phone=#{phone} and password=#{password} and account_type=#{account_type}
+    </select>
+
+    <select id="findAccount" resultType="Bd_Account">
+        SELECT id,status,account_type from bd_account where phone=#{phone} and account_type=#{account_type}
+    </select>
+
+    <select id="findAccountbyId" resultType="java.util.LinkedHashMap">
+        SELECT id,status,name,phone from bd_account where id=#{id}
+    </select>
+
+    <insert id="insertAccount" parameterType="Bd_Account" useGeneratedKeys="true" keyProperty="id">
+        insert into bd_account value(null,#{name},#{phone},#{password},#{account_type},#{create_time},#{update_time},#{creator_id},#{status})
+    </insert>
+
+    <insert id="insertAccountCityCode" >
+        insert into bd_account_city value(null,#{uid},#{city_code},#{city_name},#{create_time},#{update_time})
+    </insert>
+    <delete id="deleteAccount">
+        delete from bd_account where id=#{id};
+        delete from bd_account_city where uid=#{id};
+        delete from report where reporter_id=#{id} or creator_id=#{id};
+        delete from report_rule where creator_id=#{id};
+        delete from report_record where (director_id=#{id} or reporter_id=#{id}) and status=0;
+    </delete>
+
+    <update id="updateBdCustom">
+        update custom set user_id=0 where user_id=#{id};
+        update visits set director_id=0 where director_id=#{id};
+    </update>
+
+    <update id="updateAccountName">
+        update bd_account set name=#{name},update_time=#{time} where id=#{id}
+    </update>
+
+    <update id="updateAccountPassw">
+        update bd_account set password=#{password},update_time=#{time} where id=#{id}
+    </update>
+
+    <update id="updateAccountStatus">
+        update bd_account set status=#{status},update_time=#{time} where id=#{id}
+    </update>
+    <select id="findAccountAllCityCode" resultType="Integer">
+        SELECT city_code from bd_account_city where uid=#{uid}
+    </select>
+    <select id="findAccountAllCityCodeandName" resultType="CityCode">
+        SELECT city_code,city_name from bd_account_city where uid=#{uid}
+    </select>
+
+    <delete id="deleteAccountCityCode">
+        delete from bd_account_city where uid=#{uid} and city_code=#{city_code}
+    </delete>
+
+    <select id="findCanSeeAccountList" resultType="java.util.LinkedHashMap">
+        SELECT DISTINCT bd_account.id id,bd_account.name name,bd_account.phone phone,bd_account.status status from bd_account${condition}
+    </select>
+
+    <select id="findCanSeeAccountCount" resultType="Integer">
+        SELECT COUNT(DISTINCT bd_account.id) from bd_account${condition}
+    </select>
+
+    <select id="findProjectAllCity" resultType="CityCode">
+        select distinct city_code,city_name from cityandcode
+    </select>
+
+    <select id="CountBDVisits" resultType="Integer">
+        select count(distinct id) from visits where user_id=#{id}
+    </select>
+    <select id="CountBDReport" resultType="Integer">
+        select count(distinct id) from report_record where reporter_id=#{id} and (status=1 or status=2)
+    </select>
+    <select id="CountBDCustom" resultType="Integer">
+        select count(distinct id) from custom where user_id=#{id}
+    </select>
+    <select id="CountBDCustomcooperate" resultType="Integer">
+        select count(distinct id) from custom where user_id=#{id} and status=1
+    </select>
+
+
+    <select id="CountBDVisitsByApp" resultType="Integer">
+        select count(distinct id) from visits where user_id${condition}
+    </select>
+    <select id="CountBDReportByApp" resultType="Integer">
+        select count(distinct id) from report_record where (status=1 or status=2) and reporter_id${condition}
+    </select>
+    <select id="CountBDCustomByApp" resultType="Integer">
+        select count(distinct id) from custom where user_id${condition}
+    </select>
+    <select id="CountBDCustomCooperateByApp" resultType="Integer">
+        select count(distinct id) from custom where status=1 and user_id${condition}
+    </select>
+    <select id="CountBDCustomAuditByApp" resultType="Integer">
+        select count(distinct id) from custom where status=3 and user_id${condition}
+    </select>
+</mapper>

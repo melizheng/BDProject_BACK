@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zheng.business.dao.ReportMapper">
+
+    <insert id="insertReportRule"  useGeneratedKeys="true" keyProperty="id">
+        insert into report_rule value(#{id},#{creator_id},#{rule_name},#{report_rate},#{report_date},#{start_time},#{end_time},#{create_time},#{update_time});
+    </insert>
+
+    <insert id="insertReportMiddle">
+        insert into report value(#{creator_id},#{report_rule_id},#{reporter_id});
+    </insert>
+
+    <insert id="insertReportRecordBySystem" useGeneratedKeys="true" keyProperty="id">
+        insert into report_record value(null,#{rule_id},#{rule_name},#{report_rate},#{reporter_id},#{reporter_name},#{director_id},#{director_name},#{work_summary},#{problem},#{img_url},#{status},#{create_time},#{update_time},#{visit_total},#{start_time},#{end_time},#{submittime},#{deadline});
+    </insert>
+
+
+    <select id="scheduledTasksGetReportRule" resultType="Report_Rule">
+        select * from report_rule${condition}
+    </select>
+
+    <select id="getReportRuleReporterIdByRuleId" resultType="Long">
+        select reporter_id from report where report_rule_id=#{report_rule_id}
+    </select>
+
+    <delete id="deleteReportRule">
+        delete from report_rule where id=#{id};
+        delete from report where report_rule_id=#{id};
+        delete from report_record where rule_id=#{id} and status=0;
+    </delete>
+
+
+    <select id="getReportRuleByID" resultType="java.util.LinkedHashMap">
+        select id,rule_name,report_rate,report_date,start_time,end_time from report_rule where id=#{id};
+    </select>
+
+    <select id="getReportRuleList" resultType="java.util.LinkedHashMap">
+        select id,rule_name,report_rate,report_date,start_time,end_time from report_rule where creator_id=#{creator_id} ${condition};
+    </select>
+
+    <select id="getRuleCount" resultType="Integer">
+        select COUNT(1) as count from report_rule where creator_id=#{id}
+    </select>
+
+    <select id="getRuleBDNumber" resultType="Integer">
+        select COUNT(1) as count from report where report.report_rule_id=#{report_rule_id}
+    </select>
+
+
+    <select id="existReportRecordById" resultType="Report_Record">
+        select reporter_id,start_time,end_time from report_record where id=#{id}
+    </select>
+
+    <update id="updateReportRecord">
+        update report_record set work_summary=#{work_summary},problem=#{problem},img_url=#{img_url},status=#{status},create_time=#{create_time},update_time=#{update_time},visit_total=#{visit_total} where id=#{id}
+    </update>
+
+    <select id="getVisitsCountByBd" resultType="Integer">
+        SELECT COUNT(DISTINCT visits.id) from visits where user_id=#{reporter_id} and create_time between #{start_time} and #{end_time}
+    </select>
+
+    <select id="getReportRecordList" resultType="java.util.LinkedHashMap">
+        SELECT id,rule_name,report_rate,reporter_name,director_name,work_summary,visit_total,status,submittime,deadline from report_record where (reporter_id=#{user_id} or director_id=#{user_id}) ${condition}
+    </select>
+
+    <select id="getReportRecordListCount" resultType="Integer">
+        SELECT COUNT(DISTINCT report_record.id) from report_record where (reporter_id=#{user_id} or director_id=#{user_id}) ${condition}
+    </select>
+
+    <select id="getReportRecordById" resultType="java.util.LinkedHashMap">
+        SELECT id,report_rate,reporter_id,rule_name,reporter_name,director_id,director_name,work_summary,problem,img_url,visit_total,status,start_time,end_time,deadline,update_time from report_record where id=#{id}
+    </select>
+
+    <update id="cleanReportRecordById">
+        update report_record set img_url=null,work_summary=null,problem=null,status=0,create_time=null,update_time=null,visit_total=0 where id=#{id};
+    </update>
+
+    <update id="readReport">
+        update report_record set status=2 where id=#{id} and director_id=#{director_id} and status=1;
+    </update>
+
+    <update id="updateReportImages">
+        update report_record set img_url=#{img_url} where id=#{id};
+    </update>
+</mapper>

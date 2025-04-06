@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zheng.business.dao.VisitMapper">
+
+    <insert id="insertVisit"  useGeneratedKeys="true" keyProperty="id">
+        insert into visits value(null,#{create_time},#{update_time},#{user_name},#{user_id},#{director_id},#{custom_id},#{visit_id},#{remark},#{status},#{read_status},#{edit_status},#{longitude},#{latitude});
+    </insert>
+
+    <select id="insertVisitImgBeforeFind" resultType="Integer">
+        SELECT id from visit_img where visit_id=#{visit_id}
+    </select>
+
+    <insert id="insertVisitImg">
+        insert into visit_img value(null,#{visit_id},#{url});
+    </insert>
+
+    <update id="updateVisitImg">
+        update visit_img set url=#{url} where visit_id=#{visit_id}
+    </update>
+
+    <update id="updateVisit">
+        update visits set remark=#{remark},update_time=#{time},read_status=0,edit_status=1 where id=#{id};
+    </update>
+
+    <delete id="deleteVisitById">
+        delete from visits where id=#{id};
+    </delete>
+
+
+    <select id="findCanSeeVisitList" resultType="java.util.LinkedHashMap">
+        SELECT visits.id,visits.user_name,custom.company_name,visits.visit_id,visits.remark,visits.status,read_status,edit_status,visits.director_id,visits.create_time from visits,custom,bd_account where custom.id=visits.custom_id and bd_account.id=visits.user_id and (visits.user_id=#{user_id} or visits.director_id=#{user_id}) ${condition}
+    </select>
+
+    <select id="findCanSeeVisitListBYADMIN" resultType="java.util.LinkedHashMap">
+        SELECT visits.id,visits.user_name,custom.company_name,visits.visit_id,visits.remark,visits.status,read_status,edit_status,visits.director_id,visits.create_time from visits,custom,bd_account where custom.id=visits.custom_id and bd_account.id=visits.user_id ${condition}
+    </select>
+
+    <select id="findVisitsCount" resultType="Integer">
+        SELECT COUNT(DISTINCT visits.id) from visits,custom,bd_account where custom.id=visits.custom_id and bd_account.id=visits.user_id and (visits.user_id=#{user_id} or visits.director_id=#{user_id}) ${condition}
+    </select>
+
+    <select id="findVisitsCountBYADMIN" resultType="Integer">
+        SELECT COUNT(DISTINCT visits.id) from visits,custom,bd_account where custom.id=visits.custom_id and bd_account.id=visits.user_id ${condition}
+    </select>
+
+    <select id="findVisitbyId" resultType="java.util.LinkedHashMap">
+        select b.id ,b.bd_name ,b.company_name,b.visit_id,b.remark,b.status,read_status,edit_status,bd_account.name as leader_name,b.create_time,b.update_time FROM(select a.id ,a.director_id,a.bd_name ,custom.company_name as company_name,a.visit_id,a.remark,a.status,read_status,edit_status,a.create_time,a.update_time FROM (select id,director_id,user_name as bd_name,visit_id,remark,status,read_status,edit_status,custom_id,create_time,update_time from visits where visits.id=#{id}) as a LEFT JOIN custom on a.custom_id=custom.id)as b LEFT JOIN  bd_account on b.director_id=bd_account.id
+
+    </select>
+
+    <select id="findVisitImg" resultType="String">
+        select url from visit_img where visit_img.visit_id=#{id}
+    </select>
+
+    <update id="readVisit">
+        update visits set read_status=1 where id=#{id} and director_id=#{director_id} and read_status=0;
+    </update>
+</mapper>
